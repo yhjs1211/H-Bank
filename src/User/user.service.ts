@@ -29,7 +29,10 @@ export class UserService {
           statusCode: "BAD_REQUEST",
         });
 
-      const user = await this.userRepository.findOne({ where: { id } });
+      const user = await this.userRepository.findOne({
+        where: { id },
+        relations: { userInfo: true },
+      });
 
       if (!user)
         throw new ErrorHandler({
@@ -106,11 +109,18 @@ export class UserService {
         statusCode: "UNAUTHORIZED",
         message: "Please check your ID/PW.",
       });
+
     const { accessToken, refreshToken } = Auth.createTokens(user.id);
+    const key = `user:${user.id}`;
+
+    await dataManager.redis.hSet(key, "refreshToken", refreshToken);
+    await dataManager.redis.expire(key, 43200);
+
     return { status: 200, accessToken, refreshToken };
   }
 
-  async logout(): Promise<ReponseUser | undefined> {
+  async logout(body: any): Promise<ReponseUser | undefined> {
+    await dataManager.redis.hDel(`user:${body.data.id}`, "refreshToken");
     return;
   }
 }

@@ -18,16 +18,18 @@ export const router = Router();
 // Controller
 const userController: UserController = new UserController();
 
-router.route("/").get(userController.getUsers);
+router.route("/").get(Auth.getTokenFromRequest, userController.getUsers);
 
 router.route("/signup").post(userController.createUser);
 
 router.route("/login").post(userController.loginUser);
 
-router.route("/logout").post(userController.logoutUser);
+router
+  .route("/logout")
+  .post(Auth.getTokenFromRequest, userController.logoutUser);
 
 router
   .route("/:userId")
-  .get(userController.getUser)
+  .post(Auth.getTokenFromRequest, userController.getUser)
   .patch(userController.updateUser)
   .delete(userController.deleteUser);

@@ -3,6 +3,7 @@ import { UserService, userService } from "./user.service";
 import { CreateUserDTO } from "./dto/create.user.dto";
 import { CreateUserInfoDTO } from "./dto/create.userInfo.dto";
 import { LoginDTO } from "./dto/login.dto";
+import { User } from "../DB/entities/user.entity";
 
 export class UserController {
   private readonly userService: UserService = userService;
@@ -36,6 +37,8 @@ export class UserController {
     res.clearCookie("Authorization", { httpOnly: true });
     res.clearCookie("refreshToken", { httpOnly: true });
 
+    this.userService.logout(req.body.user);
+
     res.status(200).json({
       success: true,
       message: "Success to logout",
@@ -43,13 +46,20 @@ export class UserController {
   };
 
   getUser = (req: Request, res: Response, next: NextFunction): void => {
-    const id = req.params.userId;
+    const { loginId, password } = req.body;
+    const user: User = req.body.user;
 
-    const user = this.userService.findUserById(id);
-    res.status(200).json({
-      message: "hello Bank",
-      id,
-    });
+    if (user.loginId === loginId && user.password === password) {
+      res.status(200).json({
+        success: true,
+        user,
+      });
+    } else {
+      res.status(401).json({
+        success: false,
+        message: "Check your ID / PW. try again.",
+      });
+    }
   };
 
   getUsers = (req: Request, res: Response, next: NextFunction): void => {

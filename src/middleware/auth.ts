@@ -33,7 +33,7 @@ export default class Auth {
       }
     }
 
-    const user = await userService.findUserById(String(id));
+    const user = (await userService.findUserById(String(id)))?.data;
 
     req.body.user = user;
 
