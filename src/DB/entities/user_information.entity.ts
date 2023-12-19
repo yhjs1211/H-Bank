@@ -6,7 +6,7 @@ export class UserInformation {
   @PrimaryColumn()
   userId!: number;
 
-  @OneToOne(() => User, (user) => user.id)
+  @OneToOne(() => User, (user) => user.userInfo)
   @JoinColumn({
     name: "userId",
     referencedColumnName: "id",
@@ -16,13 +16,20 @@ export class UserInformation {
   @Column()
   name_english!: string;
 
-  @Column()
+  @Column({
+    type: "varchar",
+    length: "13",
+  })
   mobile!: string;
 
   @Column()
   address!: string;
 
-  @Column()
+  @Column({
+    type: "varchar",
+    length: 14,
+    comment: "주민등록번호",
+  })
   id_number!: string;
 
   @Column()

@@ -4,6 +4,7 @@ import express from "express";
 import { dataManager } from "./DB";
 import { router } from "./routers";
 import { Logger } from "./middleware/logger";
+import { configData } from "./config";
 
 class App {
   private app = express();
@@ -26,7 +27,7 @@ class App {
 
     this.dataManager.init();
 
-    this.app.listen(process.env.SERVER_PORT, () => {
+    this.app.listen(configData.server.port, () => {
       console.log(`Server is running on ${process.env.SERVER_PORT}`);
     });
   }

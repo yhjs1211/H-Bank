@@ -1,31 +1,32 @@
 import { DataSource } from "typeorm";
-import redis from "redis";
-import dotenv from "dotenv";
+import * as redis from "redis";
 import { User } from "./entities/user.entity";
 import { UserInformation } from "./entities/user_information.entity";
 import { Loan } from "./entities/loan.entity";
 import { Accounts } from "./entities/account.entity";
 import { UserLoan } from "./entities/user_loan.entity";
-
-dotenv.config();
+import { configData } from "../config";
 
 class Database {
   readonly mysql;
-  // private redis;
+  readonly redis;
 
   constructor() {
     this.mysql = new DataSource({
       type: "mysql",
-      host: process.env.DB_HOST,
-      database: process.env.DB_DATABASE,
-      username: process.env.DB_USERNAME,
-      password: process.env.DB_PASSWORD,
-      port: process.env.DB_PORT ? parseInt(process.env.DB_PORT) : 3306,
-      synchronize: true,
+      host: configData.db.host,
+      database: configData.db.database,
+      username: configData.db.user,
+      password: configData.db.pw,
+      port: parseInt(configData.db.port),
+      synchronize: configData.server.env === "production",
       logging: false,
       entities: [User, UserLoan, UserInformation, Loan, Accounts],
     });
-    // this.redis = redis.createClient();
+
+    this.redis = redis.createClient({
+      url: configData.redis.url,
+    });
   }
 
   init() {
@@ -35,7 +36,16 @@ class Database {
         console.log(`occured Error about ${e}`);
       })
       .then(() => {
-        console.log("DB has been initialized..");
+        console.log("MySQL has been connected..");
+      });
+
+    this.redis
+      .connect()
+      .catch((e) => {
+        console.error(`occured Error about ${e}`);
+      })
+      .then(() => {
+        console.log("Redis has been connected..");
       });
   }
 }
